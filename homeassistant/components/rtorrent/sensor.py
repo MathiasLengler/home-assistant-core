@@ -140,7 +140,7 @@ class RTorrentSensor(SensorEntity):
         self._attr_name = f"{client_name} {description.name}"
         self._attr_available = False
 
-    def update(self):
+    def update(self) -> None:
         """Get the latest data from rtorrent and updates the state."""
         multicall = xmlrpc.client.MultiCall(self.client)
         multicall.throttle.global_up.rate()

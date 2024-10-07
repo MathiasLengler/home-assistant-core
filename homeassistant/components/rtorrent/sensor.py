@@ -7,6 +7,7 @@ import xmlrpc.client
 
 import voluptuous as vol
 
+from homeassistant.components.number import NumberEntity
 from homeassistant.components.sensor import (
     PLATFORM_SCHEMA as SENSOR_PLATFORM_SCHEMA,
     SensorDeviceClass,
@@ -111,11 +112,16 @@ def setup_platform(
         _LOGGER.error("Connection to rtorrent daemon failed")
         raise PlatformNotReady from ex
     monitored_variables = config[CONF_MONITORED_VARIABLES]
-    entities = [
-        RTorrentSensor(rtorrent, name, description)
-        for description in SENSOR_TYPES
-        if description.key in monitored_variables
-    ]
+    entities = (
+        [
+            RTorrentSensor(rtorrent, name, description)
+            for description in SENSOR_TYPES
+            if description.key in monitored_variables
+        ]
+        + [
+            # TODO: RTorrentGlobalThrottle
+        ]
+    )
 
     add_entities(entities)
 
@@ -126,11 +132,31 @@ def format_speed(speed: int) -> float:
     return round(kb_spd, 2 if kb_spd < 0.1 else 1)
 
 
+# TODO: use DataUpdateCoordinator
+#  https://developers.home-assistant.io/docs/integration_fetching_data/#coordinated-single-api-poll-for-data-for-all-entities
+
+
+class RTorrentGlobalThrottle(NumberEntity):
+    """Representation of an rtorrent global throttle."""
+
+    # TODO: add params
+    #  up/down
+    def __init__(self) -> None:
+        pass
+
+    # TODO: call max_rate.set
+    def set_native_value(self, value: float) -> None:
+        pass
+
+
 class RTorrentSensor(SensorEntity):
     """Representation of an rtorrent sensor."""
 
     def __init__(
-        self, rtorrent_client, client_name, description: SensorEntityDescription
+        self,
+        rtorrent_client: xmlrpc.client.ServerProxy,
+        client_name: str,
+        description: SensorEntityDescription,
     ) -> None:
         """Initialize the sensor."""
         self.entity_description = description

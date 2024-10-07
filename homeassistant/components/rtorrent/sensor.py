@@ -120,7 +120,7 @@ def setup_platform(
     add_entities(entities)
 
 
-def format_speed(speed):
+def format_speed(speed: int) -> float:
     """Return a bytes/s measurement as a human readable string."""
     kb_spd = float(speed) / 1024
     return round(kb_spd, 2 if kb_spd < 0.1 else 1)
